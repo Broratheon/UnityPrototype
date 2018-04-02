@@ -5,35 +5,43 @@ using UnityEngine;
 public class MainCharacter : MonoBehaviour {
 
     public float speed = 1.0f;
-    public Transform AttackObject;
+    public GameObject AttackObject;
+    public float attackSpeed = 0.4f;
 
-	// Use this for initialization
-	void Start () {
+    private Dictionary<string, Vector3> KeyToActionMap = new Dictionary<string, Vector3>  { { "w", Vector3.up },
+                                                                                            { "a", Vector3.left },
+                                                                                            { "s", Vector3.down },
+                                                                                            { "d", Vector3.right } };
+    private float attackTimer = 100000f;
+
+    // Use this for initialization
+    void Start () {
 		
 	}
 	
 	// Update is called once per frame
 	void Update () {
-        CharacterMoveSet();
+        ReactToKeyPress();
     }
 
-    private void CharacterMoveSet()
-    {
-        if (Input.GetKey("s"))
-            transform.Translate(Vector3.down * speed * Time.deltaTime);
+    private void ReactToKeyPress() {
+        attackTimer += Time.deltaTime;
 
-        if (Input.GetKey("a"))
-            transform.Translate(Vector3.left * speed * Time.deltaTime);
+        CharacterMovement();
 
-        if (Input.GetKey("d"))
-            transform.Translate(Vector3.right * speed * Time.deltaTime);
-
-        if (Input.GetKey("w"))
-            transform.Translate(Vector3.up * speed * Time.deltaTime);
-
-        if (Input.GetKey("space"))
-            Instantiate(AttackObject, transform.position + Vector3.right, Quaternion.identity);
-
+        if (Input.GetKey("space") && attackTimer > attackSpeed)
+        {
+            Instantiate(AttackObject, transform.position + (Vector3.right * 1.5f), Quaternion.identity);
+            attackTimer = 0;
+        }
     }
 
+    // Handles movmement of the character
+    private void CharacterMovement() {
+        foreach (KeyValuePair<string, Vector3> mapping in KeyToActionMap)
+        {
+            if (Input.GetKey(mapping.Key))
+                transform.Translate(mapping.Value * speed * Time.deltaTime);
+        }
+    }
 }
